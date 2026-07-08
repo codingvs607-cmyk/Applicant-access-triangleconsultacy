@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Job Application & Owner Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        
+        .signature-font {
+            font-family: 'Great Vibes', cursive;
+        }
+        
+         ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+         ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .tab-nav-btn {
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        
+        .tab-nav-btn.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        
+        .mobile-bottom-nav {
+            display: none;
+        }
+        
+        @media (max-width: 640px) {
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                justify-content: space-between;
+                gap: 0.5rem;
+                padding: 0.75rem 0.75rem 0.9rem;
+                background: rgba(15, 23, 42, 0.96);
+                border-top: 1px solid rgba(148, 163, 184, 0.2);
+                z-index: 60;
+            }
+            .content-with-bottom-nav {
+                padding-bottom: 5.5rem !important;
+            }
+            .mobile-nav-button {
+                flex: 1;
+                min-width: 0;
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.25rem;
+                padding: 0.65rem 0.6rem;
+                border-radius: 1rem;
+                font-size: 0.72rem;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100">
+    <div id="security-banner" class="fixed left-1/2 top-4 z-[70] hidden -translate-x-1/2 w-[min(92vw,32rem)] rounded-2xl border border-amber-300 bg-amber-600/95 px-4 py-3 text-white shadow-2xl">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="text-sm font-bold">Security notice</p>
+                <p id="security-banner-message" class="text-sm text-amber-50">Someone is trying to make changes to a form on your website.</p>
+            </div>
+            <button type="button" onclick="document.getElementById('security-banner').classList.add('hidden')" class="text-lg font-semibold leading-none">×</button>
+        </div>
+    </div>
+
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center px-4 py-10">
+        <div class="w-full max-w-6xl rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+            <div class="grid lg:grid-cols-[1.1fr_0.9fr]">
+                <div class="bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 p-8 sm:p-10 text-white">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">
+                        <i class="fa-solid fa-shield-halved"></i> Secure access portal
+                    </div>
+                    <h1 class="mt-6 text-3xl sm:text-4xl font-black leading-tight">Apply for a role or manage the owner dashboard.</h1>
+                    <p class="mt-4 max-w-xl text-sm sm:text-base text-slate-300">Applicants can sign in to start the job application form, while owners can access the admin dashboard and submission review area.</p>
+                </div>
+
+                <div class="grid gap-4 p-6 sm:p-8">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                        <div class="flex items-center gap-2 text-indigo-700">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <h2 class="text-lg font-bold">Applicant Login</h2>
+                        </div>
+                        <p class="mt-2 text-sm text-slate-600">Use this section to start the application form. Applicants can enter their own email and password to continue.</p>
+                        <div class="mt-4 space-y-3">
+                            <input id="portal-login-email" type="email" placeholder="Enter your email" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <input id="portal-login-password" type="password" placeholder="Enter your password" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="button" onclick="handleAuthLogin('portal')" class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">Continue to Apply</button>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-500">The applicant email and password stay the same for the form login. Only the owner can change website text or settings.</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-800">
+                            <i class="fa-solid fa-user-tie"></i>
+                            <h2 class="text-lg font-bold">Owner Login</h2>
+                        </div>
+                        <p class="mt-2 text-sm text-slate-600">Any details on the job can be changed by the owners and employees. Use this section to open the owner dashboard.</p>
+                        <div class="mt-4 space-y-3">
+                            <input id="owner-login-email" type="email" placeholder="Enter owner email" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <input id="owner-login-password" type="password" placeholder="Enter owner password" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="button" onclick="handleOwnerPortalLogin()" class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">Open Owner Dashboard</button>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-500">If you want to change anything, you can change it in the form from the employee. Those who have to fill the form can use their own email and password for the Google Chrome browser.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-shell" class="hidden min-h-screen flex flex-col antialiased">
+        <header class="bg-slate-900 text-white shadow-lg no-print">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-indigo-600 rounded-lg text-white">
+                        <i class="fa-solid fa-building-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 id="nav-company-name" class="text-xl font-extrabold tracking-tight">Triangle Consultancy</h1>
+                        <p class="text-xs text-indigo-300">Consulting Engineer — Civil Consultant • Planners • Interior Designer</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div id="user-badge" class="hidden rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1 text-xs font-semibold text-slate-200"></div>
+                    <nav class="hidden sm:flex space-x-1 bg-slate-800 p-1 rounded-xl">
+                        <button onclick="switchTab('apply-tab')" id="btn-apply-tab" data-tab="apply-tab" class="tab-nav-btn px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white transition-all duration-150">
+                            <i class="fa-solid fa-file-pen mr-2"></i>Apply Now
+                        </button>
+                        <button onclick="switchTab('owner-tab')" id="btn-owner-tab" data-tab="owner-tab" class="tab-nav-btn px-4 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white transition-all duration-150">
+                            <i class="fa-solid fa-user-tie mr-2"></i>Owner Dashboard
+                        </button>
+                        <button onclick="switchTab('database-tab')" id="btn-database-tab" data-tab="database-tab" class="tab-nav-btn px-4 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white transition-all duration-150">
+                            <i class="fa-solid fa-database mr-2"></i>Submissions (<span id="submissions-count">0</span>)
+                        </button>
+                    </nav>
+                    <button onclick="logoutPortal()" class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 content-with-bottom-nav">
+
+        <div id="apply-tab" class="tab-content block">
+            <div id="submission-alert" class="hidden mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg text-emerald-800 shadow-sm flex items-start gap-3">
+                <i class="fa-solid fa-circle-check text-xl mt-0.5"></i>
+                <div>
+                    <h4 class="font-bold">Application Submitted Successfully!</h4>
+                    <p class="text-sm">The form has been securely recorded. The Owner can review and instantly run Gemini AI screenings in the dashboard.</p>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-slate-800 to-indigo-900 rounded-2xl p-6 sm:p-8 text-white mb-8 shadow-xl relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="relative z-10">
+                    <span class="bg-indigo-500/30 text-indigo-300 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase">Careers & Placement</span>
+                    <h2 id="banner-company-title" class="text-3xl sm:text-4xl font-black mt-2">Triangle Consultancy</h2>
+                    <p id="banner-company-slogan" class="text-slate-300 mt-1 max-w-2xl text-sm sm:text-base">Consulting Engineer — Civil Consultant • Planners • Interior Designer</p>
+
+                    <div class="mt-4 flex flex-wrap gap-4 text-xs text-slate-300 border-t border-slate-700/50 pt-4">
+                        <a id="banner-email" href="mailto:TriangleConsentency302@gmail.com" class="inline-flex items-center text-cyan-300 hover:text-cyan-200 hover:underline transition-colors"><i class="fa-solid fa-envelope mr-1.5"></i>TriangleConsentency302@gmail.com</a>
+                        <a id="banner-location" href="https://www.google.com/maps/search/?api=1&query=302+Royal+Kedar+Plaza+Opp.+Akhand+Anand+College+Ved+Road+Surat+Gujarat" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-amber-300 hover:text-amber-200 hover:underline transition-colors"><i class="fa-solid fa-map-pin mr-1.5"></i>302, Royal Kedar Plaza, Opp. Akhand Anand College, Ved Road, Surat, Gujarat</a>
+                        <a href="tel:+919825139217" class="inline-flex items-center text-emerald-300 hover:text-emerald-200 hover:underline transition-colors"><i class="fa-solid fa-phone mr-1.5"></i>Office: 9825139217 / Owner: 9824439217</a>
+                        <a href="https://www.instagram.com/triangleconsultancyoffice?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-pink-300 hover:text-pink-200 hover:underline transition-colors"><i class="fa-brands fa-instagram mr-1.5"></i>Instagram</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+                <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">Application Form</h3>
+                        <p class="text-sm text-slate-500">Fill the form, then click the submit button at the bottom.</p>
+                    </div>
+                    <div class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Form Only</div>
+                </div>
+                <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-print mt-0.5"></i>
+                        <div>
+                            <div class="font-semibold">Printer connection required</div>
+                            <p class="mt-1 text-xs leading-relaxed">The application details are saved as a PDF and can be shared on WhatsApp. Printing will not work until a Wi‑Fi or wireless printer is connected and available.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <label for="jobFormTitleDisplay" class="block text-sm font-semibold text-slate-700 mb-1.5">Selected Job Form Name</label>
+                        <input type="text" id="jobFormTitleDisplay" value="Job Form" readonly class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                    </div>
+
+                </div>
+            </div>
+
+            <form id="job-form" onsubmit="handleFormSubmission(event)" class="space-y-8">
+                <div class="bg-amber-50/70 border border-amber-200 rounded-2xl shadow-sm p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-amber-500 text-white text-xs px-4 py-1.5 font-bold uppercase rounded-bl-xl tracking-wider">Office Authorization First</div>
+                    <div class="flex items-center space-x-2 text-amber-800 mb-4">
+                        <i class="fa-solid fa-lock text-xl"></i>
+                        <h3 class="text-lg font-bold">1. Owner / Office Pre-Authorization</h3>
+                    </div>
+                    <p class="text-xs text-amber-700 mb-6 max-w-3xl leading-relaxed">
+                        <strong>Attention Candidate:</strong> The office requires standard pre-authorization inputs and owner guidelines verified first. Complete your entry after checking this section.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">Owner Signature / Full Name</label>
+                                <input type="text" id="owner-signature-input" name="ownerName" required class="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-sm font-medium" placeholder="Owner Signature Authorized">
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-amber-50 flex items-center justify-between text-xs text-slate-500">
+                                <span>Status: <strong class="text-emerald-600">Preset Ready</strong></span>
+                                <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm">
+                            <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">Pre-Approval Date</label>
+                            <input type="date" id="owner-date-input" name="ownerApprovalDate" required class="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-sm font-medium">
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm">
+                            <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Office Tracking Presets</label>
+                            <div class="space-y-2 mt-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600">49-Days Completion Target:</span>
+                                    <span class="font-bold text-slate-800">Enabled</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600">System Code:</span>
+                                    <span class="font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">GUJ-CIVIL-2026</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">2</span>
+                        <h3 class="text-lg font-bold">Personal Details</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="fullName" class="block text-sm font-semibold text-slate-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="fullName" name="fullName" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="Enter your full name">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-1.5">Email ID <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" id="email" name="email" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="name@example.com">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="mobile" class="block text-sm font-semibold text-slate-700 mb-1.5">Mobile Number</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-phone"></i></span>
+                                <input type="tel" id="mobile" name="mobile" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="Primary contact number">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="city" class="block text-sm font-semibold text-slate-700 mb-1.5">City <span class="text-red-500">*</span></label>
+                            <input type="text" id="city" name="city" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="e.g., Surat">
+                        </div>
+
+                        <div>
+                            <label for="state" class="block text-sm font-semibold text-slate-700 mb-1.5">State <span class="text-red-500">*</span></label>
+                            <input type="text" id="state" name="state" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="e.g., Gujarat">
+                        </div>
+
+                        <div>
+                            <label for="pincode" class="block text-sm font-semibold text-slate-700 mb-1.5">Pincode <span class="text-red-500">*</span></label>
+                            <input type="text" id="pincode" name="pincode" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="e.g., 395007">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">3</span>
+                        <h3 class="text-lg font-bold">Position Applied For</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <label class="relative flex items-center p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="position" value="Diploma Civil" required class="h-4 w-4 text-indigo-600">
+                            <div class="ml-3">
+                                <span class="block text-sm font-bold text-slate-800">Diploma Civil</span>
+                            </div>
+                        </label>
+                        <label class="relative flex items-center p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="position" value="Draughtsman Civil" class="h-4 w-4 text-indigo-600">
+                            <div class="ml-3">
+                                <span class="block text-sm font-bold text-slate-800">Draughtsman Civil</span>
+                            </div>
+                        </label>
+                        <label class="relative flex items-center p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+                            <input type="radio" name="position" value="B.Arch" class="h-4 w-4 text-indigo-600">
+                            <div class="ml-3">
+                                <span class="block text-sm font-bold text-slate-800">B.Arch</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">4</span>
+                        <h3 class="text-lg font-bold">Educational Qualification</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="educationDegree" class="block text-sm font-semibold text-slate-700 mb-1.5">Course / Degree <span class="text-red-500">*</span></label>
+                            <input type="text" id="educationDegree" name="educationDegree" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="e.g., B.E. Civil">
+                        </div>
+                        <div>
+                            <label for="collegeName" class="block text-sm font-semibold text-slate-700 mb-1.5">College / Institution <span class="text-red-500">*</span></label>
+                            <input type="text" id="collegeName" name="collegeName" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="e.g., SVNIT, Nirma">
+                        </div>
+                        <div>
+                            <label for="yearOfPassing" class="block text-sm font-semibold text-slate-700 mb-1.5">Year of Passing <span class="text-red-500">*</span></label>
+                            <input type="number" id="yearOfPassing" name="yearOfPassing" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="2025">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">5</span>
+                        <h3 class="text-lg font-bold">Skills & Software Checklist</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">AutoCAD Skill</h4>
+                            </div>
+                            <div class="flex space-x-2">
+                                <label class="px-3 py-1 bg-white border rounded-lg text-xs"><input type="radio" name="skillAutoCAD" value="Yes" required> Yes</label>
+                                <label class="px-3 py-1 bg-white border rounded-lg text-xs"><input type="radio" name="skillAutoCAD" value="No"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                            <h4 class="font-bold text-sm text-slate-800 mb-1">Architecture Planning</h4>
+                            <select name="skillArchPlanning" required class="w-full bg-white border border-slate-200 rounded-lg py-1 px-2 text-xs">
+                                <option value="Basic">Basic</option>
+                                <option value="Intermediate" selected>Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-indigo-900">PreDCR Gujarat</h4>
+                            </div>
+                            <div class="flex space-x-2">
+                                <label class="px-3 py-1 bg-white border rounded-lg text-xs"><input type="radio" name="skillPreDCR" value="Yes" required> Yes</label>
+                                <label class="px-3 py-1 bg-white border rounded-lg text-xs"><input type="radio" name="skillPreDCR" value="No"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-indigo-900">eNagar Portal</h4>
+                            </div>
+                            <div class="flex space-x-2">
+                                <label class="px-3 py-1 bg-white border rounded-lg text-xs"><input type="radio" name="skilleNagar" value="Yes" required> Yes</label>
+                                <label class="px-3 py-1 bg-white border rounded-lg text-xs"><input type="radio" name="skilleNagar" value="No"> No</label>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 md:col-span-2">
+                            <label for="experienceDetails" class="block text-xs font-bold text-slate-700 uppercase mb-1">Brief Project or Work Description (for AI Assessment)</label>
+                            <textarea id="experienceDetails" name="experienceDetails" rows="2" class="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-3 text-sm" placeholder="Describe projects handled, architectural drawing tasks or field experience..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">6</span>
+                        <h3 class="text-lg font-bold">Declarations & Commitment</h3>
+                    </div>
+                    <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl text-xs text-indigo-950 space-y-2">
+                        <p><strong>Minimum 49 Days Commitment:</strong> I hereby pledge to complete a mandatory office tenure of no less than 49 days without deviation.</p>
+                        <label class="flex items-center mt-3"><input type="checkbox" name="commitmentPledge" required class="mr-2"> I accept and verify the 49-day timeline pledge signature.</label>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">7</span>
+                        <h3 class="text-lg font-bold">Leave / Resignation Request</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="leaveDate" class="block text-sm font-semibold text-slate-700 mb-1.5">Requested Leave / Last Working Day</label>
+                            <input type="date" id="leaveDate" name="leaveDate" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label for="leaveNoticeDays" class="block text-sm font-semibold text-slate-700 mb-1.5">Notice Period (Days)</label>
+                            <input type="number" id="leaveNoticeDays" name="leaveNoticeDays" min="1" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="20">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="leaveReason" class="block text-sm font-semibold text-slate-700 mb-1.5">Reason for Leaving</label>
+                            <textarea id="leaveReason" name="leaveReason" rows="3" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="Mention your reason for leaving on the selected day."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">8</span>
+                        <h3 class="text-lg font-bold">Property / Land Documentation Gallery</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="sitePhotoUrl" class="block text-sm font-semibold text-slate-700 mb-1.5">Site Photo Link / Gallery URL</label>
+                            <input type="url" id="sitePhotoUrl" name="sitePhotoUrl" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="https://example.com/photo.jpg">
+                        </div>
+                        <div>
+                            <label for="siteVideoUrl" class="block text-sm font-semibold text-slate-700 mb-1.5">Site Video Link / Gallery URL</label>
+                            <input type="url" id="siteVideoUrl" name="siteVideoUrl" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="https://example.com/video.mp4">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="landDocsNotes" class="block text-sm font-semibold text-slate-700 mb-1.5">Land / Plot / Tomb Documentation Notes</label>
+                            <textarea id="landDocsNotes" name="landDocsNotes" rows="3" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="Add photo, video, and documentation details for the land or plot."></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-900">
+                        <p class="font-semibold">HD photo and video references can be added here for the site, land, or tomb documentation and will be included in the saved form copy.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="w-full sm:w-1/2">
+                        <label for="candidateFullNameSig" class="block text-sm font-semibold text-slate-700 mb-1">Candidate Full Name Signature <span class="text-red-500">*</span></label>
+                        <input type="text" id="candidateFullNameSig" name="candidateFullNameSig" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="Type your name to e-sign">
+                        <input type="hidden" id="submissionDate" name="submissionDate">
+                    </div>
+                    <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow transition">Submit Secure Application</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="owner-tab" class="tab-content hidden space-y-8">
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-amber-800">Triangle 302 Owner-only security monitor</h3>
+                        <p class="text-sm text-amber-700">Any blocked change attempt is recorded here and shown as a live warning.</p>
+                    </div>
+                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">Protected</span>
+                </div>
+                <div id="security-alerts-list" class="mt-3 grid gap-2"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center space-x-2 text-slate-800 border-b border-slate-100 pb-4 mb-6">
+                        <i class="fa-solid fa-gears text-indigo-600 text-xl"></i>
+                        <h3 class="text-lg font-bold">Branding Setup & Core Options</h3>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-semibold text-slate-800">Owner Login</h4>
+                                <p class="text-xs text-slate-500">Enter your owner credentials to access the dashboard.</p>
+                            </div>
+                            <span id="owner-auth-status" class="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700">Login required</span>
+                        </div>
+                        <p class="mb-4 text-sm text-slate-600">Any details on the job can be changed by the owners and employees. Use this section to open the owner dashboard.</p>
+                        <div class="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-800">
+                            <div class="font-semibold">Owner Demo Credentials</div>
+                            <div class="mt-1 text-xs text-indigo-700">Email: TriangleConsentency302@gmail.com • Password: triangle@302</div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                                <input type="email" id="owner-auth-email" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Mobile</label>
+                                <input type="tel" id="owner-auth-mobile" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Owner Password</label>
+                                <input type="password" id="owner-auth-password" value="triangle@302" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3 mt-4">
+                            <button type="button" onclick="handleOwnerAuth('signin')" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg text-sm">Open Owner Dashboard</button>
+                            <button type="button" onclick="handleOwnerAuth('signup')" class="bg-slate-900 text-white font-semibold py-2 px-4 rounded-lg text-sm">Save Owner Access</button>
+                            <button type="button" onclick="logoutOwnerAuth()" class="bg-rose-50 text-rose-700 font-semibold py-2 px-4 rounded-lg text-sm">Sign Out</button>
+                        </div>
+                    </div>
+                    <form id="company-setup-form" onsubmit="saveCompanySetup(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Company / Firm Name</label>
+                                <input type="text" id="setup-company-name" data-owner-only="true" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Tagline</label>
+                                <input type="text" id="setup-slogan" data-owner-only="true" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Selected Job Form Name</label>
+                                <input type="text" id="setup-form-title" data-owner-only="true" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Owner Name</label>
+                                <input type="text" id="setup-owner-name" data-owner-only="true" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Email ID</label>
+                                <input type="email" id="setup-email" data-owner-only="true" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Phone Number</label>
+                                <input type="text" id="setup-phone" data-owner-only="true" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Address</label>
+                                <input type="text" id="setup-location" data-owner-only="true" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">QR Code / WhatsApp Link</label>
+                                <input type="text" id="setup-qr" data-owner-only="true" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" placeholder="https://wa.me/919824439217">
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-slate-900 text-white font-bold py-2.5 px-6 rounded-xl text-sm hover:bg-slate-800 transition">Save Configurations</button>
+                    </form>
+                </div>
+
+                <div class="bg-gradient-to-br from-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 border-b border-indigo-800/50 pb-3 mb-4">
+                            <i class="fa-solid fa-brain text-indigo-400 text-xl"></i>
+                            <h4 class="font-bold tracking-tight text-indigo-100">Gemini LLM Integration</h4>
+                        </div>
+                        <div class="mb-4 rounded-xl border border-indigo-800/40 bg-slate-900/50 p-3 text-xs text-slate-300">
+                            <div class="font-semibold text-indigo-200 mb-1">WhatsApp / QR</div>
+                            <a href="https://wa.me/919825139217" target="_blank" class="text-indigo-300 underline">Open WhatsApp: 9825139217</a>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            <i class="fa-solid fa-key text-indigo-400 mr-2"></i>
+                            Input your Gemini API Key below to enable instant AI screening, review, and candidate assessment.
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label for="gemini-api-key" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Gemini API Key</label>
+                                <div class="relative">
+                                    <input type="password" id="gemini-api-key" data-owner-only="true" class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-400" placeholder="AIzaSy...">
+                                </div>
+                            </div>
+                            <button onclick="saveApiKey()" data-owner-only="true" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-4 rounded-lg transition">Save and Verify Key</button>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-indigo-900 space-y-2 text-[11px] text-slate-400">
+                        <div class="flex items-center justify-between"><span>Storage Used</span><span id="storage-used-text" class="font-mono text-indigo-300">0 KB</span></div>
+                        <div class="flex items-center justify-between"><span>Available Storage</span><span id="storage-remaining-text" class="font-mono text-indigo-300">5 MB</span></div>
+                        <div class="flex items-center justify-between"><span>Saved Records</span><span id="storage-record-count" class="font-mono text-indigo-300">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="database-tab" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-database mr-2 text-indigo-600"></i>Applicant Records Database</h3>
+                <button onclick="clearAllData()" class="px-3 py-1.5 bg-rose-50 text-rose-700 font-semibold rounded-xl text-xs hover:bg-rose-100 transition">Clear Database</button>
+            </div>
+
+            <div id="submissions-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="empty-database-state" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                <p class="text-sm text-slate-400">No Applications Received Yet.</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="mobile-bottom-nav sm:hidden">
+        <button onclick="switchTab('apply-tab')" data-tab="apply-tab" class="tab-nav-btn mobile-nav-button text-slate-200 bg-slate-800 hover:bg-slate-700">
+            <i class="fa-solid fa-file-pen"></i>
+            <span>Apply</span>
+        </button>
+        <button onclick="switchTab('owner-tab')" data-tab="owner-tab" class="tab-nav-btn mobile-nav-button text-slate-200 bg-slate-800 hover:bg-slate-700">
+            <i class="fa-solid fa-user-tie"></i>
+            <span>Owner</span>
+        </button>
+        <button onclick="switchTab('database-tab')" data-tab="database-tab" class="tab-nav-btn mobile-nav-button text-slate-200 bg-slate-800 hover:bg-slate-700">
+            <i class="fa-solid fa-database"></i>
+            <span>Data</span>
+        </button>
+    </div>
+
+    <div id="print-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-2xl">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Office Review Sheet & AI Deep Profile</h3>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="triggerPrint()" class="px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-print"></i> Print</button>
+                    <button onclick="closePrintModal()" class="p-1.5 bg-slate-200 rounded-lg text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6" id="printable-area-container"></div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        let companyConfig = {
+            companyName: "Triangle Consultancy",
+            slogan: "Consulting Engineer — Civil Consultant • Planners • Interior Designer",
+            email: "TriangleConsentency302@gmail.com",
+            location: "302, Royal Kedar Plaza, Opp. Akhand Anand College, Ved Road, Surat, Gujarat",
+            ownerName: "Mr. Jitendra I. Lad",
+            phone: "9824439217 / 9825139217",
+            formTitle: "Job Form",
+            qrLink: "https://wa.me/919824439217"
+        };
+
+        let submissions = [];
+        let geminiApiKey = "";
+        const STORAGE_LIMIT_BYTES = 5 * 1024 * 1024;
+        let draftData = null;
+
+        function getContactNumbers() {
+            const configuredNumbers = String(companyConfig.phone || '')
+                .split(/[\/|,]/)
+                .map((part) => part.replace(/\D/g, ''))
+                .filter(Boolean);
+
+            return configuredNumbers.length ? configuredNumbers : ['9824439217', '9825139217'];
+        }
+
+        function getDetailingPdfFileName() {
+            return 'detailing.pdf';
+        }
+
+        function getOwnerWhatsAppNumber() {
+            return '9824439217';
+        }
+
+        function getShareCaption(data, pdfUrl) {
+            const applicationLink = `${window.location.href.split('#')[0]}?${new URLSearchParams({
+                fullName: data.fullName || '',
+                email: data.email || '',
+                mobile: data.mobile || '',
+                city: data.city || '',
+                state: data.state || '',
+                pincode: data.pincode || '',
+                position: data.position || '',
+                educationDegree: data.educationDegree || '',
+                collegeName: data.collegeName || '',
+                yearOfPassing: data.yearOfPassing || '',
+                experienceDetails: data.experienceDetails || '',
+                leaveDate: data.leaveDate || '',
+                leaveNoticeDays: data.leaveNoticeDays || '',
+                leaveReason: data.leaveReason || '',
+                sitePhotoUrl: data.sitePhotoUrl || '',
+                siteVideoUrl: data.siteVideoUrl || '',
+                landDocsNotes: data.landDocsNotes || ''
+            }).toString()}`;
+
+            return [
+                'Hello, I am sharing my job application details for review.',
+                '',
+                `Applicant Name: ${data.fullName || ''}`,
+                `Email: ${data.email || ''}`,
+                `Mobile: ${data.mobile || ''}`,
+                `Position: ${data.position || ''}`,
+                '',
+                `Please review the application details and save the PDF as ${getDetailingPdfFileName()}.`,
+                `Application link: ${applicationLink}`,
+                `PDF link: ${pdfUrl}`
+            ].join('\n');
+        }
+        let ownerSession = { loggedIn: false, email: '', mobile: '' };
+        let portalUser = null;
+        let otpSession = null;
+        let otpCountdownTimer = null;
+        let securityAlerts = [];
+        const OWNER_NOTIFICATION_EMAILS = ['TriangleConsentency302@gmail.com', 'jilad7675@gmail.com'];
+        const SECURE_ACCESS_CREDENTIALS = [
+            { email: 'TriangleConsentency302@gmail.com', password: 'triangle@302' },
+            { email: 'jilad7675@gmail.com', password: 'triangle@302' }
+        ];
+        const APPLICANT_ACCESS_CREDENTIALS = [];
+
+        function showAuthScreen() {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('app-shell').classList.add('hidden');
+        }
+
+        function showAppShell() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-shell').classList.remove('hidden');
+        }
+
+        function generateOtpCode() {
+            return String(Math.floor(100000 + Math.random() * 900000));
+        }
+
+        function clearOtpCountdown() {
+            if (otpCountdownTimer) {
+                clearInterval(otpCountdownTimer);
+                otpCountdownTimer = null;
+            }
+        }
+
+        function updateOtpCountdown() {
+            if (!otpSession?.expiresAt) return;
+            const remaining = Math.max(0, Math.ceil((otpSession.expiresAt - Date.now()) / 1000));
+            const countdown = document.getElementById('otp-countdown');
+            if (countdown) {
+                countdown.innerText = remaining > 0 ? `Valid for ${remaining} seconds` : 'OTP expired. Please request a new one by tapping resend.';
+            }
+            if (remaining === 0) {
+                clearOtpCountdown();
+                if (document.getElementById('otp-panel')) {
+                    document.getElementById('otp-delivery-status').innerText = 'OTP expired. Please request a new one by tapping resend.';
+                }
+            }
+        }
+
+        function startOtpCountdown() {
+            clearOtpCountdown();
+            otpSession.expiresAt = Date.now() + 15000;
+            updateOtpCountdown();
+            otpCountdownTimer = setInterval(updateOtpCountdown, 1000);
+        }
+
+        function deliverOtpToChannels(otp, email, phone) {
+            const recipientEmail = email || companyConfig.email;
+            const recipientPhone = phone || companyConfig.phone;
+            const subject = `Your OTP is ${otp}`;
+            const body = `Your OTP for the portal is ${otp}. Enter it within 15 seconds.`;
+            const mailtoUrl = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            const configuredNumbers = getContactNumbers();
+            const primaryPhone = configuredNumbers[0] || '';
+            const smsUrl = primaryPhone ? `sms:${primaryPhone}?body=${encodeURIComponent(body)}` : '';
+            const whatsappUrl = primaryPhone ? `https://wa.me/${primaryPhone}?text=${encodeURIComponent(body)}` : '';
+
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(otp).catch(() => {});
+            }
+
+            if (recipientEmail) {
+                window.open(mailtoUrl, '_blank', 'noopener,noreferrer');
+            }
+            if (smsUrl) {
+                window.open(smsUrl, '_blank', 'noopener,noreferrer');
+            }
+            if (whatsappUrl) {
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            }
+
+            const deliveryTargets = [recipientEmail, recipientPhone].filter(Boolean).join(' and ');
+            document.getElementById('otp-delivery-status').innerText = `OTP prepared for ${deliveryTargets}. Your email and SMS apps were invited to open with the code.`;
+        }
+
+        function showOtpFlow(role, email, phone = '') {
+            const otp = generateOtpCode();
+            otpSession = { role, email, phone, otp, createdAt: Date.now(), expiresAt: Date.now() + 15000 };
+            localStorage.setItem('portal_pending_otp', JSON.stringify(otpSession));
+            document.getElementById('otp-panel').classList.remove('hidden');
+            document.getElementById('otp-panel-title').innerText = role === 'applicant' ? 'Applicant OTP' : 'Owner OTP';
+            document.getElementById('otp-panel-subtitle').innerText = `A one-time passcode is being sent to ${email}${phone ? ` and ${phone}` : ''}.`;
+            document.getElementById('otp-code').innerText = otp;
+            document.getElementById('otp-input').value = '';
+            document.getElementById('otp-input').focus();
+            deliverOtpToChannels(otp, email, phone);
+            startOtpCountdown();
+            alert(`OTP generated for ${email}. Use code ${otp} to continue.`);
+        }
+
+        function requestOtpAgain() {
+            if (!otpSession) return;
+            const role = otpSession.role;
+            const email = otpSession.email;
+            const phone = otpSession.phone || '';
+            showOtpFlow(role, email, phone);
+        }
+
+        function notifyOwnerOfAttempt(message, source = 'unauthorized-edit') {
+            const entry = {
+                id: Date.now(),
+                message: message || 'Someone is trying to make changes to a form on your website.',
+                source,
+                timestamp: new Date().toLocaleString(),
+                actor: portalUser?.email || 'Unknown user'
+            };
+            securityAlerts.unshift(entry);
+            securityAlerts = securityAlerts.slice(0, 6);
+            localStorage.setItem('portal_security_alerts', JSON.stringify(securityAlerts));
+            document.getElementById('security-banner-message').innerText = entry.message;
+            document.getElementById('security-banner').classList.remove('hidden');
+            renderSecurityAlerts();
+            alert(entry.message);
+        }
+
+        function renderSecurityAlerts() {
+            const list = document.getElementById('security-alerts-list');
+            if (!list) return;
+            if (!securityAlerts.length) {
+                list.innerHTML = '<p class="text-sm text-slate-500">No blocked activity yet.</p>';
+                return;
+            }
+            list.innerHTML = securityAlerts.map((item) => `
+                <div class="rounded-xl border border-amber-200 bg-white/80 p-3 text-sm text-amber-800">
+                    <div class="font-semibold">${item.message}</div>
+                    <div class="mt-1 text-xs text-amber-600">${item.timestamp} • ${item.actor}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadSecurityAlerts() {
+            const storedAlerts = localStorage.getItem('portal_security_alerts');
+            if (storedAlerts) {
+                securityAlerts = JSON.parse(storedAlerts);
+            }
+            renderSecurityAlerts();
+        }
+
+        function attachOwnerGuard() {
+            document.querySelectorAll('[data-owner-only="true"]').forEach((element) => {
+                if (element.dataset.ownerGuardBound === 'true') return;
+                element.dataset.ownerGuardBound = 'true';
+                element.addEventListener('input', (event) => {
+                    if (portalUser?.role === 'owner' && ownerSession.loggedIn) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.target.value = '';
+                    notifyOwnerOfAttempt('An unauthorized user attempted to edit owner-controlled form settings.', 'owner-control');
+                });
+            });
+        }
+
+        function setOwnerControlsLocked(locked) {
+            document.querySelectorAll('[data-owner-only="true"]').forEach((element) => {
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.tagName === 'SELECT' || element.tagName === 'BUTTON') {
+                    element.disabled = locked;
+                    element.setAttribute('aria-disabled', String(locked));
+                    if (locked) {
+                        element.classList.add('opacity-60', 'cursor-not-allowed');
+                    } else {
+                        element.classList.remove('opacity-60', 'cursor-not-allowed');
+                    }
+                }
+            });
+
+            const saveConfigButton = document.querySelector('#company-setup-form button[type="submit"]');
+            if (saveConfigButton) {
+                saveConfigButton.disabled = locked;
+                saveConfigButton.setAttribute('aria-disabled', String(locked));
+            }
+        }
+
+        function updateAccessMode() {
+            const isApplicant = portalUser?.role === 'applicant';
+            const ownerNav = document.getElementById('btn-owner-tab');
+            const databaseNav = document.getElementById('btn-database-tab');
+            const ownerMobileNav = document.querySelector('.mobile-bottom-nav [data-tab="owner-tab"]');
+            const databaseMobileNav = document.querySelector('.mobile-bottom-nav [data-tab="database-tab"]');
+
+            [ownerNav, databaseNav, ownerMobileNav, databaseMobileNav].forEach((element) => {
+                if (element) {
+                    element.classList.toggle('hidden', isApplicant);
+                }
+            });
+
+            const ownerLocked = !portalUser || portalUser.role !== 'owner' || !ownerSession.loggedIn;
+            setOwnerControlsLocked(ownerLocked);
+        }
+
+        function updatePortalUI() {
+            const badge = document.getElementById('user-badge');
+            if (!portalUser) {
+                badge.classList.add('hidden');
+                badge.innerHTML = '';
+                updateAccessMode();
+                return;
+            }
+
+            const label = portalUser.role === 'owner' ? 'Owner access' : 'Applicant access';
+            badge.classList.remove('hidden');
+            badge.innerText = `${label}: ${portalUser.email}`;
+            updateAccessMode();
+        }
+
+        function handleOwnerPortalLogin() {
+            const email = document.getElementById('owner-login-email')?.value.trim() || '';
+            const password = document.getElementById('owner-login-password')?.value.trim() || '';
+
+            if (!email || !password) {
+                alert('Please enter the owner email and password to open the dashboard.');
+                return;
+            }
+
+            const isOwnerEmail = email.toLowerCase().includes('triangle') || email.toLowerCase().includes('consultancy');
+            const isOwnerPassword = password.length > 0;
+
+            if (!isOwnerEmail || !isOwnerPassword) {
+                alert('Only the owner can open the dashboard. Use an owner email and password.');
+                return;
+            }
+
+            portalUser = { role: 'owner', email };
+            ownerSession = { loggedIn: true, email, mobile: '' };
+            localStorage.setItem('portal_session', JSON.stringify(portalUser));
+            localStorage.setItem('owner_session', JSON.stringify(ownerSession));
+            updatePortalUI();
+            updateOwnerAuthUI();
+            showAppShell();
+            switchTab('owner-tab');
+        }
+
+        function handleAuthLogin(role) {
+            const email = document.getElementById('portal-login-email')?.value.trim() || '';
+            const password = document.getElementById('portal-login-password')?.value.trim() || '';
+
+            if (!email || !password) {
+                alert('Please enter both your email and password before opening the portal.');
+                return;
+            }
+
+            portalUser = { role: 'applicant', email };
+            localStorage.setItem('portal_session', JSON.stringify(portalUser));
+            localStorage.removeItem('portal_pending_otp');
+            otpSession = null;
+            updatePortalUI();
+            showAppShell();
+            switchTab('apply-tab');
+        }
+
+        function logoutPortal() {
+            clearOtpCountdown();
+            portalUser = null;
+            ownerSession = { loggedIn: false, email: '', mobile: '' };
+            localStorage.removeItem('portal_session');
+            localStorage.removeItem('owner_session');
+            updatePortalUI();
+            updateOwnerAuthUI();
+            showAuthScreen();
+        }
+
+        window.onload = function() {
+            const savedPortalSession = localStorage.getItem('portal_session');
+            if (savedPortalSession) {
+                portalUser = JSON.parse(savedPortalSession);
+            }
+
+            if (localStorage.getItem('company_form_config')) companyConfig = JSON.parse(localStorage.getItem('company_form_config'));
+            if (localStorage.getItem('company_submissions_db')) submissions = JSON.parse(localStorage.getItem('company_submissions_db'));
+            if (localStorage.getItem('gemini_api_key')) {
+                geminiApiKey = localStorage.getItem('gemini_api_key');
+                document.getElementById('gemini-api-key').value = geminiApiKey;
+            }
+            if (localStorage.getItem('job_form_draft')) {
+                draftData = JSON.parse(localStorage.getItem('job_form_draft'));
+            }
+            if (localStorage.getItem('owner_session')) {
+                ownerSession = JSON.parse(localStorage.getItem('owner_session'));
+            }
+            if (localStorage.getItem('portal_pending_otp')) {
+                otpSession = JSON.parse(localStorage.getItem('portal_pending_otp'));
+            }
+
+            document.getElementById('submissionDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('owner-date-input').value = new Date().toISOString().split('T')[0];
+
+            updateAppBranding();
+            loadDraftIntoForm();
+            renderSubmissions();
+            updateStorageStatus();
+            updateOwnerAuthUI();
+            loadSecurityAlerts();
+            attachOwnerGuard();
+            updatePortalUI();
+
+            if (portalUser) {
+                showAppShell();
+                switchTab(portalUser.role === 'owner' ? 'owner-tab' : 'apply-tab');
+            } else {
+                showAuthScreen();
+            }
+        };
+
+        function saveApiKey() {
+            const key = document.getElementById('gemini-api-key').value.trim();
+            if (!key) return alert("Please enter a valid key string.");
+            if (portalUser?.role !== 'owner' || !ownerSession.loggedIn) {
+                notifyOwnerOfAttempt('An unauthorized user attempted to save the Gemini API key.', 'api-key');
+                return;
+            }
+            geminiApiKey = key;
+            localStorage.setItem('gemini_api_key', key);
+            alert("Gemini LLM Key stored successfully!");
+        }
+
+        function handleOwnerAuth(type) {
+            const email = document.getElementById('owner-auth-email').value.trim();
+            const mobile = document.getElementById('owner-auth-mobile').value.trim();
+            const password = document.getElementById('owner-auth-password').value.trim();
+            if (!email || !password) {
+                alert('Please add email and password to continue.');
+                return;
+            }
+
+            const matchedOwnerCredential = SECURE_ACCESS_CREDENTIALS.find((entry) => entry.email.toLowerCase() === email.toLowerCase() && entry.password === password);
+            if (!matchedOwnerCredential) {
+                alert('Only the owner can unlock these controls. Use the approved owner email and password.');
+                return;
+            }
+
+            portalUser = { role: 'owner', email };
+            ownerSession = { loggedIn: true, email, mobile };
+            localStorage.setItem('portal_session', JSON.stringify(portalUser));
+            localStorage.setItem('owner_session', JSON.stringify(ownerSession));
+            updatePortalUI();
+            updateOwnerAuthUI();
+            showAppShell();
+            switchTab('owner-tab');
+            alert('Owner dashboard opened successfully.');
+        }
+
+        function logoutOwnerAuth() {
+            ownerSession = { loggedIn: false, email: '', mobile: '' };
+            localStorage.removeItem('owner_session');
+            updateOwnerAuthUI();
+        }
+
+        function updateOwnerAuthUI() {
+            const status = document.getElementById('owner-auth-status');
+            if (ownerSession.loggedIn) {
+                status.innerText = `Signed in as ${ownerSession.email || ownerSession.mobile}`;
+                status.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700';
+            } else {
+                status.innerText = 'Login required';
+                status.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700';
+            }
+            setOwnerControlsLocked(!portalUser || portalUser.role !== 'owner' || !ownerSession.loggedIn);
+        }
+
+        function updateAppBranding() {
+            document.getElementById('nav-company-name').innerText = companyConfig.companyName;
+            document.getElementById('banner-company-title').innerText = companyConfig.companyName;
+            document.getElementById('banner-company-slogan').innerText = companyConfig.slogan;
+            document.getElementById('banner-email').href = `mailto:${companyConfig.email}`;
+            document.getElementById('banner-email').innerHTML = `<i class="fa-solid fa-envelope mr-1.5"></i>${companyConfig.email}`;
+            document.getElementById('banner-location').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(companyConfig.location)}`;
+            document.getElementById('banner-location').innerHTML = `<i class="fa-solid fa-map-pin mr-1.5"></i>${companyConfig.location}`;
+            document.getElementById('owner-signature-input').value = companyConfig.ownerName;
+            document.getElementById('setup-company-name').value = companyConfig.companyName;
+            document.getElementById('setup-slogan').value = companyConfig.slogan;
+            document.getElementById('setup-form-title').value = companyConfig.formTitle;
+            document.getElementById('setup-owner-name').value = companyConfig.ownerName;
+            document.getElementById('setup-email').value = companyConfig.email;
+            document.getElementById('setup-phone').value = companyConfig.phone;
+            document.getElementById('setup-location').value = companyConfig.location;
+            document.getElementById('setup-qr').value = companyConfig.qrLink;
+            document.getElementById('jobFormTitleDisplay').value = companyConfig.formTitle;
+            document.getElementById('submissions-count').innerText = submissions.length;
+        }
+
+        function handleFormSubmission(e) {
+            e.preventDefault();
+            const formData = new FormData(document.getElementById('job-form'));
+
+            const record = {
+                id: 'APPL-' + Date.now(),
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                mobile: formData.get('mobile'),
+                city: formData.get('city'),
+                state: formData.get('state'),
+                pincode: formData.get('pincode'),
+                position: formData.get('position'),
+                educationDegree: formData.get('educationDegree'),
+                collegeName: formData.get('collegeName'),
+                yearOfPassing: formData.get('yearOfPassing'),
+                skillAutoCAD: formData.get('skillAutoCAD'),
+                skillArchPlanning: formData.get('skillArchPlanning'),
+                skillPreDCR: formData.get('skillPreDCR'),
+                skilleNagar: formData.get('skilleNagar'),
+                experienceDetails: formData.get('experienceDetails') || 'No additional project context given.',
+                leaveDate: formData.get('leaveDate') || '',
+                leaveNoticeDays: formData.get('leaveNoticeDays') || '',
+                leaveReason: formData.get('leaveReason') || '',
+                sitePhotoUrl: formData.get('sitePhotoUrl') || '',
+                siteVideoUrl: formData.get('siteVideoUrl') || '',
+                landDocsNotes: formData.get('landDocsNotes') || '',
+                submissionDate: formData.get('submissionDate') || new Date().toISOString().split('T')[0],
+                aiAnalysis: null
+            };
+
+            submissions.unshift(record);
+            localStorage.setItem('company_submissions_db', JSON.stringify(submissions));
+            localStorage.removeItem('job_form_draft');
+
+            downloadPdfForApplicant(record);
+            notifyOwnerAboutSubmission(record);
+
+            document.getElementById('job-form').reset();
+            updateAppBranding();
+            renderSubmissions();
+            updateStorageStatus();
+
+            const alertBox = document.getElementById('submission-alert');
+            alertBox.innerHTML = `
+                <i class="fa-solid fa-circle-check text-xl mt-0.5"></i>
+                <div>
+                    <h4 class="font-bold">Application Submitted Successfully!</h4>
+                    <p class="text-sm">${record.fullName || 'Applicant'} has submitted the form. The owner has been notified at ${OWNER_NOTIFICATION_EMAILS.join(', ')} and a PDF copy of the application was prepared for review.</p>
+                </div>
+            `;
+            alertBox.classList.remove('hidden');
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // TAB NAVIGATION
+        function switchTab(tabId) {
+            if (portalUser?.role === 'applicant' && tabId !== 'apply-tab') {
+                notifyOwnerOfAttempt('An applicant tried to open a restricted portal tab.', 'tab-access');
+                tabId = 'apply-tab';
+            }
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('bg-indigo-600');
+                btn.classList.remove('text-white');
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function saveCompanySetup(e) {
+            e.preventDefault();
+            if (portalUser?.role !== 'owner' || !ownerSession.loggedIn) {
+                notifyOwnerOfAttempt('An unauthorized user tried to change the company configuration form.', 'company-config');
+                switchTab('apply-tab');
+                return;
+            }
+            companyConfig.companyName = document.getElementById('setup-company-name').value;
+            companyConfig.slogan = document.getElementById('setup-slogan').value;
+            companyConfig.formTitle = document.getElementById('setup-form-title').value;
+            companyConfig.ownerName = document.getElementById('setup-owner-name').value;
+            companyConfig.email = document.getElementById('setup-email').value;
+            companyConfig.phone = document.getElementById('setup-phone').value;
+            companyConfig.location = document.getElementById('setup-location').value;
+            companyConfig.qrLink = document.getElementById('setup-qr').value;
+            localStorage.setItem('company_form_config', JSON.stringify(companyConfig));
+            updateAppBranding();
+            switchTab('apply-tab');
+        }
+
+        function clearAllData() {
+            if (portalUser?.role !== 'owner' || !ownerSession.loggedIn) {
+                notifyOwnerOfAttempt('An unauthorized user tried to clear the applicant database.', 'database-clear');
+                return;
+            }
+            if (confirm("Clear database records permanently?")) {
+                submissions = [];
+                localStorage.removeItem('company_submissions_db');
+                updateAppBranding();
+                renderSubmissions();
+            }
+        }
+
+        function saveCurrentDraft() {
+            const form = document.getElementById('job-form');
+            const data = Object.fromEntries(new FormData(form).entries());
+            localStorage.setItem('job_form_draft', JSON.stringify(data));
+            draftData = data;
+            document.getElementById('draft-status').innerHTML = '<span class="text-emerald-600 font-semibold">Draft saved successfully.</span>';
+        }
+
+        function loadDraftIntoForm() {
+            if (!draftData) return;
+            const form = document.getElementById('job-form');
+            Object.entries(draftData).forEach(([name, value]) => {
+                const input = form.elements.namedItem(name);
+                if (input) {
+                    if (input.type === 'checkbox') input.checked = Boolean(value);
+                    else input.value = value;
+                }
+            });
+            document.getElementById('draft-status').innerHTML = '<span class="text-amber-600 font-semibold">Saved draft restored.</span>';
+        }
+
+        function downloadCurrentFormJson() {
+            const form = document.getElementById('job-form');
+            const data = Object.fromEntries(new FormData(form).entries());
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${companyConfig.formTitle || 'job-form'}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function getCurrentFormData() {
+            const form = document.getElementById('job-form');
+            return Object.fromEntries(new FormData(form).entries());
+        }
+
+        function buildFormPdfBlob(data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            let y = 40;
+
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.text(companyConfig.companyName || 'Triangle Consultancy', pageWidth / 2, y, { align: 'center' });
+            y += 24;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(companyConfig.slogan || 'Consulting Engineer — Civil Consultant • Planners • Interior Designer', pageWidth / 2, y, { align: 'center' });
+            y += 26;
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 20;
+
+            const rows = [
+                ['Applicant Name', data.fullName || ''],
+                ['Email', data.email || ''],
+                ['Mobile', data.mobile || ''],
+                ['City', data.city || ''],
+                ['State', data.state || ''],
+                ['Pincode', data.pincode || ''],
+                ['Position', data.position || ''],
+                ['Education Degree', data.educationDegree || ''],
+                ['College / Institution', data.collegeName || ''],
+                ['Year of Passing', data.yearOfPassing || ''],
+                ['Leave / Last Working Day', data.leaveDate || ''],
+                ['Notice Period', data.leaveNoticeDays || ''],
+                ['Experience Details', data.experienceDetails || ''],
+                ['Site Photo URL', data.sitePhotoUrl || ''],
+                ['Site Video URL', data.siteVideoUrl || ''],
+                ['Land / Documentation Notes', data.landDocsNotes || '']
+            ];
+
+            doc.setFontSize(11);
+            rows.forEach(([label, value]) => {
+                if (!value) return;
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${label}:`, margin, y);
+                doc.setFont('helvetica', 'normal');
+                const wrapped = doc.splitTextToSize(String(value), pageWidth - margin * 2 - 120);
+                doc.text(wrapped, margin + 140, y);
+                y += 14 * Math.max(wrapped.length, 1);
+                if (y > 760) {
+                    doc.addPage();
+                    y = 40;
+                }
+            });
+
+            y += 16;
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(9);
+            doc.text(`Generated on ${new Date().toLocaleString()}`, margin, y);
+            return doc.output('blob');
+        }
+
+        function buildCurrentFormPdfBlob() {
+            return buildFormPdfBlob(getCurrentFormData());
+        }
+
+        function downloadPdfForApplicant(data) {
+            const pdfBlob = buildFormPdfBlob(data);
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = getDetailingPdfFileName();
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function notifyOwnerAboutSubmission(record) {
+            const subject = `New Job Application Submitted - ${record.fullName || 'Applicant'}`;
+            const bodyLines = [
+                `A new job application was submitted for ${companyConfig.formTitle || 'Job Form'}.`,
+                '',
+                `Applicant Name: ${record.fullName || ''}`,
+                `Email: ${record.email || ''}`,
+                `Mobile: ${record.mobile || ''}`,
+                `City: ${record.city || ''}`,
+                `State: ${record.state || ''}`,
+                `Pincode: ${record.pincode || ''}`,
+                `Position: ${record.position || ''}`,
+                `Education Degree: ${record.educationDegree || ''}`,
+                `College / Institution: ${record.collegeName || ''}`,
+                `Year of Passing: ${record.yearOfPassing || ''}`,
+                `Leave / Last Working Day: ${record.leaveDate || ''}`,
+                `Notice Period: ${record.leaveNoticeDays || ''}`,
+                `Experience Details: ${record.experienceDetails || ''}`,
+                `Site Photo URL: ${record.sitePhotoUrl || ''}`,
+                `Site Video URL: ${record.siteVideoUrl || ''}`,
+                `Land / Documentation Notes: ${record.landDocsNotes || ''}`,
+                `Submission Date: ${record.submissionDate || ''}`,
+                '',
+                'A PDF copy of this application has also been prepared for download and review.'
+            ];
+            const mailtoUrl = `mailto:${OWNER_NOTIFICATION_EMAILS.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+            const link = document.createElement('a');
+            link.href = mailtoUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            return mailtoUrl;
+        }
+
+        async function saveCurrentFormPdf() {
+            const pdfBlob = buildCurrentFormPdfBlob();
+            const pdfFileName = getDetailingPdfFileName();
+            if (window.showSaveFilePicker) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: pdfFileName,
+                        types: [{ description: 'PDF', accept: { 'application/pdf': ['.pdf'] } }]
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(pdfBlob);
+                    await writable.close();
+                    document.getElementById('draft-status').innerHTML = '<span class="text-emerald-600 font-semibold">PDF saved successfully to your selected location.</span>';
+                    return;
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error(error);
+                    }
+                }
+            }
+
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = pdfFileName;
+            link.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('draft-status').innerHTML = '<span class="text-emerald-600 font-semibold">PDF downloaded. Choose Google Drive from the browser save dialog if available.</span>';
+        }
+
+        function copyApplicationLink() {
+            const data = getCurrentFormData();
+            const params = new URLSearchParams({
+                fullName: data.fullName || '',
+                email: data.email || '',
+                mobile: data.mobile || '',
+                city: data.city || '',
+                state: data.state || '',
+                pincode: data.pincode || '',
+                position: data.position || '',
+                educationDegree: data.educationDegree || '',
+                collegeName: data.collegeName || '',
+                yearOfPassing: data.yearOfPassing || '',
+                experienceDetails: data.experienceDetails || '',
+                leaveDate: data.leaveDate || '',
+                leaveNoticeDays: data.leaveNoticeDays || '',
+                leaveReason: data.leaveReason || '',
+                sitePhotoUrl: data.sitePhotoUrl || '',
+                siteVideoUrl: data.siteVideoUrl || '',
+                landDocsNotes: data.landDocsNotes || ''
+            });
+            const link = `${window.location.href.split('#')[0]}?${params.toString()}`;
+            navigator.clipboard.writeText(link).then(() => {
+                document.getElementById('draft-status').innerHTML = '<span class="text-emerald-600 font-semibold">Application link copied. Send it on WhatsApp to prefill the form.</span>';
+            }).catch(() => {
+                document.getElementById('draft-status').innerHTML = '<span class="text-amber-600 font-semibold">Copy failed. Please copy the link manually.</span>';
+            });
+        }
+
+        function shareFormViaWhatsApp() {
+            const data = getCurrentFormData();
+            const pdfBlob = buildFormPdfBlob(data);
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const phoneNumbers = getContactNumbers();
+            const params = new URLSearchParams({
+                fullName: data.fullName || '',
+                email: data.email || '',
+                mobile: data.mobile || '',
+                city: data.city || '',
+                state: data.state || '',
+                pincode: data.pincode || '',
+                position: data.position || '',
+                educationDegree: data.educationDegree || '',
+                collegeName: data.collegeName || '',
+                yearOfPassing: data.yearOfPassing || '',
+                experienceDetails: data.experienceDetails || '',
+                leaveDate: data.leaveDate || '',
+                leaveNoticeDays: data.leaveNoticeDays || '',
+                leaveReason: data.leaveReason || '',
+                sitePhotoUrl: data.sitePhotoUrl || '',
+                siteVideoUrl: data.siteVideoUrl || '',
+                landDocsNotes: data.landDocsNotes || ''
+            });
+            const applicationLink = `${window.location.href.split('#')[0]}?${params.toString()}`;
+            const message = `Hello, I would like to apply for the ${companyConfig.formTitle || 'job form'}.\n\nPlease use this link to open the form and fill the details automatically:\n${applicationLink}\n\nA PDF version is also prepared and can be saved as ${getDetailingPdfFileName()}.`;
+            const mailtoUrl = `mailto:${companyConfig.email || 'triangleconsultancy302@gmail.com'}?subject=${encodeURIComponent(`Job Application Form - ${companyConfig.formTitle || 'Job Form'}`)}&body=${encodeURIComponent(`${message}\n\nPDF link: ${pdfUrl}`)}`;
+            phoneNumbers.forEach((phone) => {
+                const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}%0A%0A${encodeURIComponent(pdfUrl)}`;
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            });
+            window.open(mailtoUrl, '_blank', 'noopener,noreferrer');
+            document.getElementById('draft-status').innerHTML = '<span class="text-green-600 font-semibold">WhatsApp and email were opened with your form link and PDF details.</span>';
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 10000);
+        }
+
+        function updateStorageStatus() {
+            const dataSize = new Blob([JSON.stringify(localStorage)], { type: 'application/json' }).size;
+            document.getElementById('storage-used-text').innerText = `${Math.round(dataSize / 1024)} KB`;
+            document.getElementById('storage-remaining-text').innerText = `${Math.max(0, Math.round((STORAGE_LIMIT_BYTES - dataSize) / 1024))} KB`;
+            document.getElementById('storage-record-count').innerText = submissions.length;
+        }
+
+        function renderSubmissions() {
+            const list = document.getElementById('submissions-list');
+            const emptyState = document.getElementById('empty-database-state');
+            if (submissions.length === 0) {
+                list.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+            list.innerHTML = '';
+
+            submissions.forEach(sub => {
+                        const hasAi = sub.aiAnalysis !== null;
+                        list.innerHTML += `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+                        <div>
+                            <span class="bg-indigo-50 text-indigo-700 font-bold text-[10px] px-2 py-0.5 rounded uppercase">${sub.position}</span>
+                            <h4 class="font-extrabold text-slate-800 text-base mt-1">${sub.fullName}</h4>
+                            <p class="text-xs text-slate-400">${sub.city}, ${sub.state}</p>
+                        </div>
+                        <div class="text-xs space-y-1 text-slate-600">
+                            <p><strong>Degree:</strong> ${sub.educationDegree}</p>
+                            <p><strong>Leave Date:</strong> ${sub.leaveDate || 'Not set'}</p>
+                            <p><strong>Phone:</strong> ${sub.mobile}</p>
+                        </div>
+                        
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-500">Gemini Screening:</span>
+                            ${hasAi ? 
+                              `<span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md"><i class="fa-solid fa-circle-check"></i> Screened</span>` : 
+                              `<button onclick="runGeminiScreening('${sub.id}', this)" class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold px-2 py-1 rounded-md transition"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Analyze App</button>`
+                            }
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <button onclick="openPrintPreview('${sub.id}')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 rounded-lg transition">View & Print Copy</button>
+                            <button onclick="deleteSubmission('${sub.id}')" class="bg-rose-50 text-rose-700 text-xs font-bold py-2 rounded-lg transition text-center">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteSubmission(id) {
+            submissions = submissions.filter(s => s.id !== id);
+            localStorage.setItem('company_submissions_db', JSON.stringify(submissions));
+            updateAppBranding();
+            updateStorageStatus();
+            renderSubmissions();
+        }
+
+        // CALL LIVE GEMINI API WITH LLM MODEL VIA STANDARD HTTP ENDPOINT FETCH
+        async function runGeminiScreening(id, btnElement) {
+            if(!geminiApiKey) {
+                alert("Please add your Gemini API Key in the Owner Dashboard first to activate the intelligent screening engine.");
+                switchTab('owner-tab');
+                return;
+            }
+
+            const target = submissions.find(s => s.id === id);
+            if(!target) return;
+
+            btnElement.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-1"></i> Processing...`;
+            btnElement.disabled = true;
+
+            // Prompt optimization targeted at architecture/civil competencies
+            const payloadPrompt = `
+                Analyze this candidate for a role as a ${target.position} at an Architecture and Civil PreDCR Engineering firm in Surat, Gujarat.
+                Candidate details:
+                Name: ${target.fullName}
+                Degree: ${target.educationDegree} from ${target.collegeName} (Year: ${target.yearOfPassing})
+                AutoCAD Capability Checkbox: ${target.skillAutoCAD}
+                PreDCR Checklist Answer: ${target.skillPreDCR}
+                eNagar Access Checkbox: ${target.skilleNagar}
+                Candidate Work Notes & Context: ${target.experienceDetails}
+
+                Provide a clean, valid JSON output strictly matching these key fields (do not wrap in markdown code fence blocks, raw text only):
+                {
+                  "suitabilityScore": "A single score out of 100",
+                  "readinessStatement": "1-2 sentence statement evaluating their capability with PreDCR building plan approvals and local municipal regulations.",
+                  "suggestedInterviewQuestion": "One direct technical interview question tailored to challenge this candidate based on their profile.",
+                  "recommendedAction": "Either Hire, Review, or Reject"
+                }
+            `;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: payloadPrompt }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                const jsonResult = await response.json();
+                const cleanText = jsonResult.candidates[0].content.parts[0].text;
+                
+                // Parse AI structured feedback directly into data array
+                target.aiAnalysis = JSON.parse(cleanText);
+                
+                localStorage.setItem('company_submissions_db', JSON.stringify(submissions));
+                renderSubmissions();
+                alert("Gemini AI Analysis complete! Open the View & Print Sheet to view results.");
+            } catch (err) {
+                console.error(err);
+                alert("Error calling Gemini API. Please double-check your Key or structural network parameters.");
+                btnElement.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Analyze App`;
+                btnElement.disabled = false;
+            }
+        }
+
+        // POPULATE INTEGRATED OFFICE RECORD AND AI COGNITIVE BLOCK
+        function openPrintPreview(id) {
+            const sub = submissions.find(s => s.id === id);
+            if(!sub) return;
+
+            const targetContainer = document.getElementById('printable-area-container');
+            
+            const aiSectionHtml = sub.aiAnalysis ? `
+                <div class="border-2 border-indigo-600 p-4 bg-indigo-50/40 rounded-lg mt-4">
+                    <div class="flex items-center space-x-2 text-indigo-900 mb-2">
+                        <i class="fa-solid fa-robot"></i>
+                        <h4 class="font-bold uppercase tracking-wider text-[11px]">Gemini LLM Cognitive Screening Insights</h4>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-xs">
+                        <div class="bg-white p-2.5 rounded border border-indigo-100">
+                            <span class="text-slate-400 block text-[10px]">AI Suitability Match</span>
+                            <span class="text-lg font-black text-indigo-700">${sub.aiAnalysis.suitabilityScore}/100</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded border border-indigo-100">
+                            <span class="text-slate-400 block text-[10px]">Recommended Action Status</span>
+                            <span class="text-sm font-bold text-slate-800">${sub.aiAnalysis.recommendedAction}</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded border border-indigo-100 col-span-3 sm:col-span-1">
+                            <span class="text-slate-400 block text-[10px]">PreDCR Core Readiness Check</span>
+                            <p class="text-[11px] text-slate-700 mt-0.5">${sub.aiAnalysis.readinessStatement}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-white rounded border border-indigo-100 text-[11px]">
+                        <strong class="text-indigo-900">Suggested Screening Question:</strong> "${sub.aiAnalysis.suggestedInterviewQuestion}"
+                    </div>
+                </div>
+            ` : `
+                <div class="border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400 rounded-lg">
+                    No active Gemini AI assessment has been computed for this candidate yet. Run analysis inside database tab.
+                </div>
+            `;
+
+            targetContainer.innerHTML = `
+                <div class="print-container space-y-6 bg-white text-black text-xs">
+                    <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-black uppercase">${companyConfig.companyName}</h2>
+                            <p class="text-[10px] text-slate-500">${companyConfig.slogan}</p>
+                        </div>
+                        <span class="border px-2 py-0.5 font-mono text-[9px]">ID: ${sub.id}</span>
+                    </div>
+
+                    ${aiSectionHtml}
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-bold border-b pb-1 mb-1 text-slate-800 uppercase text-[11px]">Candidate Identity</h4>
+                            <p class="py-0.5"><strong>Full Name:</strong> ${sub.fullName}</p>
+                            <p class="py-0.5"><strong>Contact No:</strong> ${sub.mobile}</p>
+                            <p class="py-0.5"><strong>Email ID:</strong> ${sub.email}</p>
+                            <p class="py-0.5"><strong>Location:</strong> ${sub.city}, ${sub.state}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold border-b pb-1 mb-1 text-slate-800 uppercase text-[11px]">Position Details</h4>
+                            <p class="py-0.5"><strong>Role Targeted:</strong> ${sub.position}</p>
+                            <p class="py-0.5"><strong>Education Background:</strong> ${sub.educationDegree}</p>
+                            <p class="py-0.5"><strong>College Context:</strong> ${sub.collegeName}</p>
+                            <p class="py-0.5"><strong>AutoCAD / PreDCR Checklist:</strong> ${sub.skillAutoCAD} / ${sub.skillPreDCR}</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <p class="text-[10px] text-slate-500"><strong>Candidate Notes & Project Scope Description:</strong></p>
+                        <p class="text-slate-700 italic mt-1 bg-slate-50 p-2 rounded">${sub.experienceDetails}</p>
+                    </div>
+
+                    <div class="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] text-slate-600">
+                        <div>
+                            <p><strong>Leave / Resignation:</strong> ${sub.leaveDate || 'Not provided'}</p>
+                            <p><strong>Notice Days:</strong> ${sub.leaveNoticeDays || 'Not provided'}</p>
+                            <p><strong>Reason:</strong> ${sub.leaveReason || 'Not provided'}</p>
+                        </div>
+                        <div>
+                            <p><strong>Site Photo:</strong> ${sub.sitePhotoUrl ? `<a href="${sub.sitePhotoUrl}" target="_blank" class="text-indigo-600">Open</a>` : 'Not provided'}</p>
+                            <p><strong>Site Video:</strong> ${sub.siteVideoUrl ? `<a href="${sub.siteVideoUrl}" target="_blank" class="text-indigo-600">Open</a>` : 'Not provided'}</p>
+                            <p><strong>Document Notes:</strong> ${sub.landDocsNotes || 'Not provided'}</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4 flex justify-between text-[10px] text-slate-500">
+                        <span>Pledge Signature Verification Track: Verified 49-Days Active Commitment</span>
+                        <span>Authorized Sign-off Stamp Date: ${sub.submissionDate}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function closePrintModal() { document.getElementById('print-modal').classList.add('hidden'); }
+        function triggerPrint() {
+            const printerNotice = document.getElementById('printer-status-note');
+            if (printerNotice) {
+                printerNotice.classList.remove('hidden');
+                printerNotice.innerHTML = '<span class="font-semibold">Printer not connected.</span> Connect to a Wi‑Fi or wireless printer and try again.';
+            }
+            window.print();
+        }
+    </script>
+</body>
+
+</html>
